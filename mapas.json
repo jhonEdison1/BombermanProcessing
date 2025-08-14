@@ -1,0 +1,12 @@
+[
+    {
+        "nombre": "mapa.txt",
+        "descripcion": "Mapa clásico",
+        "bloqueado": false
+    },
+    {
+        "nombre": "mapa1.txt",
+        "descripcion": "Mapa difícil",
+        "bloqueado": true
+    }
+]

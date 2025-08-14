@@ -9,6 +9,8 @@ int viewportFilas = 10;
 int viewportColumnas = 10;
 int viewportX = 0; // esquina superior izquierda de la ventana
 int viewportY = 0;
+int proximoEstado = 0; // 0: menú, 1: juego, 2: puntajes, 3: editor
+String mapaElegido = "mapa.txt"; // Nombre del mapa por defecto
 
 Escenario escenario;
 Personaje personaje;
@@ -18,24 +20,24 @@ int estado = 0; // 0: menú, 1: juego, 2: puntajes, 3: editor
 int editorX = 0, editorY = 0; // posición del cursor en el editor
 char editorBloque = '#'; // bloque seleccionado para colocar
 
+JSONArray mapasJSON; // Para guardar el JSON completo
+String[] nombresMapas; // Solo los nombres de los mapas
+String[] descripcionesMapas; // Descripciones (opcional)
+int mapaSeleccionado = 0; // Índice del mapa seleccionado
+
 PImage imgAcero, imgLadrillo, imgPersonajeFrente;
 
 void setup() {
- size(400, 400);
-  escenario = new Escenario(mapaFilas, mapaColumnas, tileSize);
-  // Buscar posición inicial del personaje en el mapa
-  int px = 0, py = 0;
-  for (int y = 0; y < mapaFilas; y++) {
-    for (int x = 0; x < mapaColumnas; x++) {
-      if (escenario.mapa[y].charAt(x) == 'P') {
-        px = x;
-        py = y;
-      }
-    }
+  size(400, 400);
+  mapasJSON = loadJSONArray("mapas.json");
+  nombresMapas = new String[mapasJSON.size()];
+  descripcionesMapas = new String[mapasJSON.size()];
+  for (int i = 0; i < mapasJSON.size(); i++) {
+    JSONObject obj = mapasJSON.getJSONObject(i);
+    nombresMapas[i] = obj.getString("nombre");
+    descripcionesMapas[i] = obj.getString("descripcion");
+    // Si quieres usar "bloqueado", también puedes guardarlo aquí
   }
-  personaje = new Personaje(px, py, tileSize);
-  viewportX = max(0, min(px - viewportColumnas/2, mapaColumnas - viewportColumnas));
-  viewportY = max(0, min(py - viewportFilas/2, mapaFilas - viewportFilas));
 }
 
 void draw() {
@@ -53,40 +55,41 @@ void draw() {
     text("4. Salir", width/2, 240);
     textSize(14);
     if (gameOver) {
-        fill(255,0,0);
-        textSize(24);
-        text("GAME OVER", width/2, 220);
+      fill(255, 0, 0);
+      textSize(24);
+      text("GAME OVER", width/2, 220);
     }
     text("Presiona 1, 2, 3 o 4", width/2, 280);
   } else if (estado == 1) {
 
+
+
     // Juego
-  dibujarMapa();
-  // El dibujo de bombas y personaje ya se realiza en dibujarMapa()
-    fill(255,0,0);
+    dibujarMapa();
+    // El dibujo de bombas y personaje ya se realiza en dibujarMapa()
+    fill(255, 0, 0);
     textSize(20);
     textAlign(LEFT, TOP);
     text("Vidas: " + personaje.vidas, 10, 10);
     if (personaje.vidas <= 0) {
-        estado = 0;
-        gameOver = true;
-        
-        personaje.vidas = 3;
-        // Reiniciar el juego
-        escenario = new Escenario(mapaFilas, mapaColumnas, tileSize);
-        // Buscar posición inicial del personaje en el mapa
-        int px = 0, py = 0;
-        for (int y = 0; y < mapaFilas; y++) {
-          for (int x = 0; x < mapaColumnas; x++) {
-            if (escenario.mapa[y].charAt(x) == 'P') {
-              px = x;
-              py = y;
-            }
+      estado = 0;
+      gameOver = true;
+
+      personaje.vidas = 3;
+      // Reiniciar el juego
+      escenario = new Escenario(mapaFilas, mapaColumnas, tileSize, mapaElegido);
+      // Buscar posición inicial del personaje en el mapa
+      int px = 0, py = 0;
+      for (int y = 0; y < mapaFilas; y++) {
+        for (int x = 0; x < mapaColumnas; x++) {
+          if (escenario.mapa[y].charAt(x) == 'P') {
+            px = x;
+            py = y;
           }
         }
-        personaje = new Personaje(px, py, tileSize);
-        bombas.clear(); // Limpiar bombas al reiniciar
-
+      }
+      personaje = new Personaje(px, py, tileSize);
+      bombas.clear();
     }
     // Dibujar y actualizar bombas
     for (int i = bombas.size()-1; i >= 0; i--) {
@@ -103,15 +106,15 @@ void draw() {
       }
     }
   } else if (estado == 2) {
-      // Puntajes (placeholder)
-      textAlign(CENTER, CENTER);
-      textSize(24);
-      fill(0);
-      text("Puntajes", width/2, 100);
-      textSize(16);
-      text("(Aquí irán los puntajes)", width/2, 150);
-      text("Presiona ESC para volver", width/2, 250);
-    } else if (estado == 3) {
+    // Puntajes (placeholder)
+    textAlign(CENTER, CENTER);
+    textSize(24);
+    fill(0);
+    text("Puntajes", width/2, 100);
+    textSize(16);
+    text("(Aquí irán los puntajes)", width/2, 150);
+    text("Presiona ESC para volver", width/2, 250);
+  } else if (estado == 3) {
     //azul claro
     background(100, 150, 255);
     textAlign(LEFT, TOP);
@@ -140,9 +143,9 @@ void draw() {
         float py = areaY + y * miniTile;
         char c = escenario.mapa[y].charAt(x);
         if (c == '#') fill(80);
-        else if (c == '.') fill(200,100,50);
+        else if (c == '.') fill(200, 100, 50);
         else if (c == '_') fill(240);
-        else if (c == 'P') fill(0,200,255);
+        else if (c == 'P') fill(0, 200, 255);
         rect(px, py, miniTile, miniTile);
         if (x == editorX && y == editorY) {
           stroke(255, 0, 0);
@@ -188,6 +191,21 @@ void draw() {
     textAlign(LEFT, TOP);
     textSize(16);
     text("Coordenada: (" + (editorX+1) + ", " + (editorY+1) + ")", 300, areaY - 30);
+  } else  if (estado == 4) {
+    background(240);
+    textAlign(CENTER, CENTER);
+    textSize(24);
+    fill(0);
+    text("Selecciona un mapa", width/2, 60);
+    textSize(16);
+    for (int i = 0; i < nombresMapas.length; i++) {
+      if (i == mapaSeleccionado) fill(255, 255, 0); // Amarillo para el seleccionado
+      else fill(0);
+      text(nombresMapas[i] + " - " + descripcionesMapas[i], width/2, 120 + i * 30);
+    }
+    textSize(14);
+    fill(0);
+    text("Flechas para mover, ENTER para seleccionar", width/2, height - 40);
   }
 }
 
@@ -212,7 +230,7 @@ void dibujarMapa() {
           }
         } else {
           // Si la línea es demasiado corta, dibuja un bloque rojo
-          fill(255,0,0);
+          fill(255, 0, 0);
           rect(px, py, tileSize, tileSize);
         }
         stroke(180);
@@ -225,7 +243,7 @@ void dibujarMapa() {
   for (int i = 0; i < bombas.size(); i++) {
     Bomba b = bombas.get(i);
     if (b.x >= viewportX && b.x < viewportX + viewportColumnas &&
-        b.y >= viewportY && b.y < viewportY + viewportFilas) {
+      b.y >= viewportY && b.y < viewportY + viewportFilas) {
       int px = (b.x - viewportX) * tileSize;
       int py = (b.y - viewportY) * tileSize;
       b.dibujar(px, py); // Modifica Bomba para aceptar px, py
@@ -233,7 +251,7 @@ void dibujarMapa() {
   }
   // Dibuja el personaje en la ventana
   if (personaje.x >= viewportX && personaje.x < viewportX + viewportColumnas &&
-      personaje.y >= viewportY && personaje.y < viewportY + viewportFilas) {
+    personaje.y >= viewportY && personaje.y < viewportY + viewportFilas) {
     int px = (personaje.x - viewportX) * tileSize;
     int py = (personaje.y - viewportY) * tileSize;
     personaje.dibujar(px, py); // Modifica Personaje para aceptar px, py
@@ -243,17 +261,19 @@ void dibujarMapa() {
 void keyPressed() {
   if (estado == 0) {
     if (key == '1') {
-      estado = 1;
+      estado = 4; // Ir a selección de mapas antes de jugar
+      proximoEstado = 1; // Guardar el estado del juego
     } else if (key == '2') {
       estado = 2;
     } else if (key == '3') {
-      estado = 3;
+      estado = 4; // Ir a selección de mapas antes de editar
+      proximoEstado = 3; // Guardar el estado del editor
       surface.setSize(900, 900);
     } else if (key == '4') {
       exit();
     }
   } else if (estado == 1) {
-     // Movimiento del personaje con flechas
+    // Movimiento del personaje con flechas
     if (keyCode == UP) {
       personaje.mover(0, -1, escenario.mapa);
     } else if (keyCode == DOWN) {
@@ -290,20 +310,49 @@ void keyPressed() {
       escenario.mapa[editorY] = fila.toString();
     } else if (key == 's' || key == 'S') {
       // Guardar mapa
-      saveStrings("mapa.txt", escenario.mapa);
+      saveStrings(mapaElegido, escenario.mapa);
     } else if (key == CODED && keyCode == ESC) {
       estado = 0;
       surface.setSize(400, 400);
     }
-   
   } else if (estado == 2 && key == CODED && keyCode == ESC) {
     estado = 0;
+  }
+
+  if (estado == 4) {
+    if (keyCode == UP) {
+      mapaSeleccionado = (mapaSeleccionado - 1 + nombresMapas.length) % nombresMapas.length;
+    } else if (keyCode == DOWN) {
+      mapaSeleccionado = (mapaSeleccionado + 1) % nombresMapas.length;
+    } else if (key == ENTER || key == RETURN) {
+      mapaSeleccionado = constrain(mapaSeleccionado, 0, nombresMapas.length - 1);
+      estado = proximoEstado; // Cambia al estado guardado
+      mapaElegido = nombresMapas[mapaSeleccionado];
+
+      //INICIALIZAR ESCENARIO
+      escenario = new Escenario(mapaFilas, mapaColumnas, tileSize, mapaElegido);
+      // Buscar posición inicial del personaje en el mapa
+      int px = 0, py = 0;
+      for (int y = 0; y < mapaFilas; y++) {
+        for (int x = 0; x < mapaColumnas; x++) {
+          if (escenario.mapa[y].charAt(x) == 'P') {
+            px = x;
+            py = y;
+          }
+        }
+      }
+      personaje = new Personaje(px, py, tileSize);
+      viewportX = max(0, min(px - viewportColumnas/2, mapaColumnas - viewportColumnas));
+      viewportY = max(0, min(py - viewportFilas/2, mapaFilas - viewportFilas));
+    } else if (key == CODED && keyCode == ESC) {
+      estado = 0; // Volver al menú principal
+    }
   }
 }
 
 // Destruye bloques destructibles ('.') en las 4 direcciones adyacentes
 void destruirBloques(int bx, int by) {
-  int[][] dirs = {{0,0},{1,0},{-1,0},{0,1},{0,-1}}; // centro y 4 lados
+  int[][] dirs = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // centro y 4 lados
   for (int i = 0; i < dirs.length; i++) {
     int nx = bx + dirs[i][0];
     int ny = by + dirs[i][1];
@@ -319,7 +368,7 @@ void destruirBloques(int bx, int by) {
 }
 
 boolean personajeEnExplosion(int bx, int by) {
-  int[][] dirs = {{0,0},{1,0},{-1,0},{0,1},{0,-1}};
+  int[][] dirs = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
   for (int i = 0; i < dirs.length; i++) {
     int nx = bx + dirs[i][0];
     int ny = by + dirs[i][1];

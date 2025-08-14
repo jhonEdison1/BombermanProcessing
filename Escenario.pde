@@ -3,11 +3,11 @@ class Escenario {
   int filas, columnas, tileSize;
   PImage imgAcero, imgLadrillo;
 
-  Escenario(int filas_, int columnas_, int tileSize_) {
+  Escenario(int filas_, int columnas_, int tileSize_, String nombreMapa) {
     filas = filas_;
     columnas = columnas_;
     tileSize = tileSize_;
-    mapa = loadStrings("mapa.txt"); // Cargar el mapa desde un archivo   
+    mapa = loadStrings(nombreMapa);  
     imgAcero = loadImage("Assets/Acero.png");
     imgLadrillo = loadImage("Assets/Ladrillo.png");
   }
