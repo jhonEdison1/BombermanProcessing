@@ -96,4 +96,11 @@
     void setResistencia(int resistencia_) {
         resistencia = resistencia_;
     }
+
+    void recibirDanio(int danio) {
+        resistencia -= danio;
+        if (resistencia <= 0) {
+            morir();
+        }
+    }
 }

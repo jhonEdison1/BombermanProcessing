@@ -39,11 +39,11 @@ class Bomba {
 
   void dibujarExplosion() {
     // Dibuja la explosión (puedes mejorar el efecto)
-    int px = x * tileSize;
+      int px = x * tileSize;
+      int py = y * tileSize;
       dibujarExplosion(px, py);
       explosionAnimCounter--;
       noFill();    
-    }
   }
 
   void dibujarExplosion(int px, int py) {

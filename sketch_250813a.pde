@@ -107,9 +107,8 @@ void draw() {
         for (int j = enemigos.size() - 1; j >= 0; j--) {
         Enemigo enemigo = enemigos.get(j);
         if (enemigo.estaVivo() && enemigoEnExplosion(enemigo, b.x, b.y)) {
-          enemigo.resistencia--;
-          if (enemigo.resistencia <= 0) {
-            enemigo.morir();          
+          enemigo.recibirDanio(1);
+          if (!enemigo.estaVivo()) {
             enemigos.remove(j);
           }
         }
