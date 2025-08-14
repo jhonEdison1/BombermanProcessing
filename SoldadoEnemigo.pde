@@ -7,8 +7,6 @@
 */
 
 class SoldadoEnemigo extends Enemigo {
-  int velocidad = 1; // Velocidad de movimiento del soldado
-  int resistencia = 1; // Resistencia del soldado
   boolean direccionX = true; // Indica si se mueve en dirección X o Y
   PImage imgLado, imgFrente;
   int frameCounter = 0;
@@ -21,7 +19,7 @@ class SoldadoEnemigo extends Enemigo {
   }
 
    @Override
-    void mover(String[] mapa, int velocidad, Boolean direccion) {
+    void mover(String[] mapa, int velocidad, boolean direccion) {
 
         frameCounter++;
         if (frameCounter < frameDelay) return;
