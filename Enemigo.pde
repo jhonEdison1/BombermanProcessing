@@ -3,9 +3,8 @@
  * Representa un enemigo en el juego.
  * es una clase abstracta que define la estructura básica de un enemigo.
  * Los enemigos deben implementar los métodos abstractos para su comportamiento específico.
- *author: Jhon Edison Rosero
- *version: 1.0
- *fecha: 2025-08-14
+ * @author Jhon Edison Rosero
+ * @version 1.0
  */
 
  abstract class Enemigo {
@@ -26,7 +25,7 @@
     resistencia = resistencia_;
   }
 
-  abstract void mover(String[] mapa, int velocidad, Boolean direccion);
+  abstract void mover(String[] mapa, int velocidad, boolean direccion);
 
   void dibujar(int px, int py) {
     if (vivo) {
