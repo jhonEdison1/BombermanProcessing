@@ -103,6 +103,17 @@ void draw() {
         if (personajeEnExplosion(b.x, b.y)) {
           personaje.perderVida();
         }
+
+        for (int j = enemigos.size() - 1; j >= 0; j--) {
+        Enemigo enemigo = enemigos.get(j);
+        if (enemigo.estaVivo() && enemigoEnExplosion(enemigo, b.x, b.y)) {
+          enemigo.resistencia--;
+          if (enemigo.resistencia <= 0) {
+            enemigo.morir();          
+            enemigos.remove(j);
+          }
+        }
+      }
         bombas.remove(i);
       }
     }
@@ -391,6 +402,18 @@ boolean personajeEnExplosion(int bx, int by) {
     int nx = bx + dirs[i][0];
     int ny = by + dirs[i][1];
     if (personaje.x == nx && personaje.y == ny) {
+      return true;
+    }
+  }
+  return false;
+}
+
+boolean enemigoEnExplosion(Enemigo enemigo, int bx, int by) {
+  int[][] dirs = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+  for (int i = 0; i < dirs.length; i++) {
+    int nx = bx + dirs[i][0];
+    int ny = by + dirs[i][1];
+    if (enemigo.x == nx && enemigo.y == ny) {
       return true;
     }
   }
