@@ -5,7 +5,6 @@
  * Los enemigos deben implementar los métodos abstractos para su comportamiento específico.
  * @author Jhon Edison Rosero
  * @version 1.0
- * @since 2025-08-14
  */
 
  abstract class Enemigo {
