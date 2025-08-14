@@ -15,6 +15,7 @@ String mapaElegido = "mapa.txt"; // Nombre del mapa por defecto
 Escenario escenario;
 Personaje personaje;
 ArrayList<Bomba> bombas = new ArrayList<Bomba>();
+ArrayList<Enemigo> enemigos = new ArrayList<Enemigo>();
 
 int estado = 0; // 0: menú, 1: juego, 2: puntajes, 3: editor
 int editorX = 0, editorY = 0; // posición del cursor en el editor
@@ -105,6 +106,18 @@ void draw() {
         bombas.remove(i);
       }
     }
+
+    for (Enemigo enemigo : enemigos) {
+      enemigo.mover(escenario.mapa, enemigo.getVelocidad(), true);
+      int px = (enemigo.x - viewportX) * tileSize;
+      int py = (enemigo.y - viewportY) * tileSize;
+      if (enemigo.x >= viewportX && enemigo.x < viewportX + viewportColumnas &&
+          enemigo.y >= viewportY && enemigo.y < viewportY + viewportFilas) {
+        enemigo.dibujar(px, py);
+      }
+    }
+
+
   } else if (estado == 2) {
     // Puntajes (placeholder)
     textAlign(CENTER, CENTER);
@@ -344,6 +357,11 @@ void keyPressed() {
       personaje = new Personaje(px, py, tileSize);
       viewportX = max(0, min(px - viewportColumnas/2, mapaColumnas - viewportColumnas));
       viewportY = max(0, min(py - viewportFilas/2, mapaFilas - viewportFilas));
+
+      enemigos.clear();
+      enemigos.add(new SoldadoEnemigo(5, 5, tileSize, 1, 1));
+
+
     } else if (key == CODED && keyCode == ESC) {
       estado = 0; // Volver al menú principal
     }
