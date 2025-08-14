@@ -14,6 +14,8 @@
   int resistencia;  
   PImage imgEnemigo;
   boolean vivo = true;
+  int muerteAnimCounter = 0;
+  int muerteAnimMax = 30;
 
 
   Enemigo(int x_, int y_, int tileSize_, String nombreImagen, int velocidad_, int resistencia_) {
@@ -30,11 +32,17 @@
   void dibujar(int px, int py) {
     if (vivo) {
       image(imgEnemigo, px, py, tileSize, tileSize);
+    } else if (muerteAnimCounter > 0) {
+        fill(200, 0, 0, 250);
+        ellipse(px + tileSize / 2, py + tileSize / 2, tileSize, tileSize);
+        muerteAnimCounter--;
+        noFill();
     }
   }
 
   void morir() {
     vivo = false;
+    muerteAnimCounter = muerteAnimMax ;
   }
 
   boolean estaVivo() {
